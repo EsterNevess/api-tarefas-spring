@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TratadorDeErros.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-tarefas</a> &gt; <a href="index.source.html" class="el_package">br.com.esternevess.tarefas.web</a> &gt; <span class="el_source">TratadorDeErros.java</span></div><h1>TratadorDeErros.java</h1><pre class="source lang-java linenums">package br.com.esternevess.tarefas.web;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import br.com.esternevess.tarefas.dominio.TransicaoInvalidaException;
+import br.com.esternevess.tarefas.servico.PrazoInvalidoException;
+import br.com.esternevess.tarefas.servico.TarefaNaoEncontradaException;
+
+/** Converte as exceções da aplicação em respostas JSON no formato ProblemDetail (RFC 9457). */
+@RestControllerAdvice
+<span class="fc" id="L21">public class TratadorDeErros {</span>
+
+    @ExceptionHandler(TarefaNaoEncontradaException.class)
+    ProblemDetail naoEncontrada(TarefaNaoEncontradaException e) {
+<span class="fc" id="L25">        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());</span>
+    }
+
+    @ExceptionHandler(TransicaoInvalidaException.class)
+    ProblemDetail transicaoInvalida(TransicaoInvalidaException e) {
+<span class="fc" id="L30">        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());</span>
+    }
+
+    @ExceptionHandler(PrazoInvalidoException.class)
+    ProblemDetail prazoInvalido(PrazoInvalidoException e) {
+<span class="fc" id="L35">        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());</span>
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    ProblemDetail acessoNegado(AccessDeniedException e) {
+<span class="fc" id="L40">        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());</span>
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ProblemDetail dadosInvalidos(MethodArgumentNotValidException e) {
+<span class="fc" id="L45">        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,</span>
+                &quot;Há campos inválidos na requisição&quot;);
+<span class="fc" id="L47">        Map&lt;String, String&gt; erros = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L48">        e.getBindingResult().getFieldErrors()</span>
+<span class="fc" id="L49">                .forEach(erro -&gt; erros.putIfAbsent(erro.getField(), erro.getDefaultMessage()));</span>
+<span class="fc" id="L50">        problema.setProperty(&quot;erros&quot;, erros);</span>
+<span class="fc" id="L51">        return problema;</span>
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ProblemDetail corpoIlegivel(HttpMessageNotReadableException e) {
+<span class="fc" id="L56">        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,</span>
+                &quot;Corpo da requisição ilegível ou com valor inválido (confira datas e valores de enum)&quot;);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ProblemDetail parametroInvalido(MethodArgumentTypeMismatchException e) {
+<span class="fc" id="L62">        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,</span>
+<span class="fc" id="L63">                &quot;Valor inválido para o parâmetro '&quot; + e.getName() + &quot;'&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

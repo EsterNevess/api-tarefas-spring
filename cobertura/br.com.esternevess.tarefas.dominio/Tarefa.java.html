@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tarefa.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-tarefas</a> &gt; <a href="index.source.html" class="el_package">br.com.esternevess.tarefas.dominio</a> &gt; <span class="el_source">Tarefa.java</span></div><h1>Tarefa.java</h1><pre class="source lang-java linenums">package br.com.esternevess.tarefas.dominio;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+/**
+ * Uma tarefa do quadro. A regra de mudança de status vive aqui dentro, e não no
+ * controlador: quem tem o dado é quem sabe se a mudança é válida.
+ */
+@Entity
+@Table(name = &quot;tarefas&quot;)
+public class Tarefa {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 120)
+    private String titulo;
+
+    @Column(length = 1000)
+    private String descricao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private Prioridade prioridade;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private StatusTarefa status;
+
+    @Column(nullable = false, length = 50)
+    private String responsavel;
+
+    @Column(nullable = false)
+    private LocalDate prazo;
+
+    @Column(name = &quot;criada_em&quot;, nullable = false)
+    private LocalDateTime criadaEm;
+
+    @Column(name = &quot;concluida_em&quot;)
+    private LocalDateTime concluidaEm;
+
+    /** Exigido pelo JPA; não use diretamente. */
+<span class="fc" id="L54">    protected Tarefa() {</span>
+<span class="fc" id="L55">    }</span>
+
+    public Tarefa(String titulo, String descricao, Prioridade prioridade, String responsavel,
+<span class="fc" id="L58">                  LocalDate prazo, LocalDateTime criadaEm) {</span>
+<span class="fc" id="L59">        this.titulo = titulo;</span>
+<span class="fc" id="L60">        this.descricao = descricao;</span>
+<span class="fc" id="L61">        this.prioridade = prioridade;</span>
+<span class="fc" id="L62">        this.responsavel = responsavel;</span>
+<span class="fc" id="L63">        this.prazo = prazo;</span>
+<span class="fc" id="L64">        this.criadaEm = criadaEm;</span>
+<span class="fc" id="L65">        this.status = StatusTarefa.PLANEJADA;</span>
+<span class="fc" id="L66">    }</span>
+
+    /** Edita os dados da tarefa. O status não muda por aqui, só por {@link #mudarStatus}. */
+    public void atualizar(String titulo, String descricao, Prioridade prioridade,
+                          String responsavel, LocalDate prazo) {
+<span class="fc" id="L71">        this.titulo = titulo;</span>
+<span class="fc" id="L72">        this.descricao = descricao;</span>
+<span class="fc" id="L73">        this.prioridade = prioridade;</span>
+<span class="fc" id="L74">        this.responsavel = responsavel;</span>
+<span class="fc" id="L75">        this.prazo = prazo;</span>
+<span class="fc" id="L76">    }</span>
+
+    /**
+     * Move a tarefa no fluxo.
+     *
+     * @throws TransicaoInvalidaException se o fluxo não permitir esse movimento
+     */
+    public void mudarStatus(StatusTarefa novo, LocalDateTime agora) {
+<span class="fc" id="L84">        TransicoesDeStatus.validar(this.status, novo);</span>
+<span class="fc" id="L85">        this.status = novo;</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (novo == StatusTarefa.CONCLUIDA) {</span>
+<span class="fc" id="L87">            this.concluidaEm = agora;</span>
+        }
+<span class="fc" id="L89">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L92">        return id;</span>
+    }
+
+    public String getTitulo() {
+<span class="fc" id="L96">        return titulo;</span>
+    }
+
+    public String getDescricao() {
+<span class="fc" id="L100">        return descricao;</span>
+    }
+
+    public Prioridade getPrioridade() {
+<span class="fc" id="L104">        return prioridade;</span>
+    }
+
+    public StatusTarefa getStatus() {
+<span class="fc" id="L108">        return status;</span>
+    }
+
+    public String getResponsavel() {
+<span class="fc" id="L112">        return responsavel;</span>
+    }
+
+    public LocalDate getPrazo() {
+<span class="fc" id="L116">        return prazo;</span>
+    }
+
+    public LocalDateTime getCriadaEm() {
+<span class="fc" id="L120">        return criadaEm;</span>
+    }
+
+    public LocalDateTime getConcluidaEm() {
+<span class="fc" id="L124">        return concluidaEm;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

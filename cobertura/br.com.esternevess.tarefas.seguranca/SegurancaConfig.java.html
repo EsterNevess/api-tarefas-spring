@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SegurancaConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-tarefas</a> &gt; <a href="index.source.html" class="el_package">br.com.esternevess.tarefas.seguranca</a> &gt; <span class="el_source">SegurancaConfig.java</span></div><h1>SegurancaConfig.java</h1><pre class="source lang-java linenums">package br.com.esternevess.tarefas.seguranca;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.SecurityFilterChain;
+
+import br.com.esternevess.tarefas.dominio.Perfil;
+
+/**
+ * Autenticação HTTP Basic com usuários fixos em memória: serve para demonstrar perfis e
+ * permissões, não para produção. Em um sistema real os usuários viriam do banco e o login
+ * seria por token (JWT/OAuth2).
+ */
+@Configuration
+<span class="fc" id="L27">public class SegurancaConfig {</span>
+
+    @Bean
+    public SecurityFilterChain filtros(HttpSecurity http) throws Exception {
+<span class="fc" id="L31">        http</span>
+<span class="fc" id="L32">                .csrf(AbstractHttpConfigurer::disable)</span>
+<span class="fc" id="L33">                .sessionManagement(s -&gt; s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))</span>
+<span class="fc" id="L34">                .authorizeHttpRequests(a -&gt; a</span>
+<span class="fc" id="L35">                        .requestMatchers(&quot;/actuator/health/**&quot;).permitAll()</span>
+<span class="fc" id="L36">                        .requestMatchers(HttpMethod.POST, &quot;/tarefas&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;SUPERVISOR&quot;)</span>
+<span class="fc" id="L37">                        .requestMatchers(HttpMethod.PUT, &quot;/tarefas/*&quot;).hasAnyRole(&quot;ADMIN&quot;, &quot;SUPERVISOR&quot;)</span>
+<span class="fc" id="L38">                        .requestMatchers(HttpMethod.DELETE, &quot;/tarefas/*&quot;).hasRole(&quot;ADMIN&quot;)</span>
+<span class="fc" id="L39">                        .anyRequest().authenticated())</span>
+<span class="fc" id="L40">                .httpBasic(Customizer.withDefaults());</span>
+<span class="fc" id="L41">        return http.build();</span>
+    }
+
+    @Bean
+    public PasswordEncoder codificadorDeSenha() {
+        // Custo 4 (o padrão é 10) para a demonstração e os testes não ficarem lentos.
+<span class="fc" id="L47">        return new BCryptPasswordEncoder(4);</span>
+    }
+
+    @Bean
+    public UserDetailsService usuarios(PasswordEncoder codificador, @Value(&quot;${app.senha-demo}&quot;) String senha) {
+<span class="fc" id="L52">        String senhaCodificada = codificador.encode(senha);</span>
+<span class="fc" id="L53">        return new InMemoryUserDetailsManager(</span>
+<span class="fc" id="L54">                usuario(&quot;admin&quot;, senhaCodificada, Perfil.ADMIN),</span>
+<span class="fc" id="L55">                usuario(&quot;supervisor&quot;, senhaCodificada, Perfil.SUPERVISOR),</span>
+<span class="fc" id="L56">                usuario(&quot;ana&quot;, senhaCodificada, Perfil.COLABORADOR),</span>
+<span class="fc" id="L57">                usuario(&quot;bruno&quot;, senhaCodificada, Perfil.COLABORADOR));</span>
+    }
+
+    private static UserDetails usuario(
+            String nome, String senhaCodificada, Perfil perfil) {
+<span class="fc" id="L62">        return User.withUsername(nome).password(senhaCodificada).roles(perfil.name()).build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

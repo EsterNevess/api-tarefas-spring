@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DiasUteis.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-tarefas</a> &gt; <a href="index.source.html" class="el_package">br.com.esternevess.tarefas.dominio</a> &gt; <span class="el_source">DiasUteis.java</span></div><h1>DiasUteis.java</h1><pre class="source lang-java linenums">package br.com.esternevess.tarefas.dominio;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+/** Contagem de dias úteis: ignora sábados, domingos e feriados nacionais. */
+public final class DiasUteis {
+
+    /** Evita recalcular a Páscoa e os feriados do mesmo ano a cada chamada. */
+<span class="fc" id="L13">    private static final Map&lt;Integer, Set&lt;LocalDate&gt;&gt; FERIADOS_POR_ANO = new ConcurrentHashMap&lt;&gt;();</span>
+
+    private DiasUteis() {
+    }
+
+    public static boolean ehDiaUtil(LocalDate data) {
+<span class="fc" id="L19">        DayOfWeek dia = data.getDayOfWeek();</span>
+<span class="fc bfc" id="L20" title="All 4 branches covered.">        if (dia == DayOfWeek.SATURDAY || dia == DayOfWeek.SUNDAY) {</span>
+<span class="fc" id="L21">            return false;</span>
+        }
+<span class="fc bfc" id="L23" title="All 2 branches covered.">        return !FERIADOS_POR_ANO.computeIfAbsent(data.getYear(), Feriados::nacionaisDe).contains(data);</span>
+    }
+
+    /**
+     * Avança {@code dias} dias úteis a partir de {@code inicio}.
+     *
+     * &lt;p&gt;O dia de início não conta. Com zero dias, devolve o próprio início, mesmo
+     * que ele não seja dia útil: &quot;somar nada&quot; não deve mudar a data.
+     *
+     * @throws IllegalArgumentException se {@code dias} for negativo
+     */
+    public static LocalDate adicionar(LocalDate inicio, int dias) {
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (dias &lt; 0) {</span>
+<span class="fc" id="L36">            throw new IllegalArgumentException(&quot;A quantidade de dias úteis não pode ser negativa&quot;);</span>
+        }
+<span class="fc" id="L38">        LocalDate atual = inicio;</span>
+<span class="fc" id="L39">        int restantes = dias;</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        while (restantes &gt; 0) {</span>
+<span class="fc" id="L41">            atual = atual.plusDays(1);</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">            if (ehDiaUtil(atual)) {</span>
+<span class="fc" id="L43">                restantes--;</span>
+            }
+        }
+<span class="fc" id="L46">        return atual;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

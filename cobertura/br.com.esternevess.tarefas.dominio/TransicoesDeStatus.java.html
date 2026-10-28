@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransicoesDeStatus.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-tarefas</a> &gt; <a href="index.source.html" class="el_package">br.com.esternevess.tarefas.dominio</a> &gt; <span class="el_source">TransicoesDeStatus.java</span></div><h1>TransicoesDeStatus.java</h1><pre class="source lang-java linenums">package br.com.esternevess.tarefas.dominio;
+
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
+
+import static br.com.esternevess.tarefas.dominio.StatusTarefa.A_FAZER;
+import static br.com.esternevess.tarefas.dominio.StatusTarefa.CONCLUIDA;
+import static br.com.esternevess.tarefas.dominio.StatusTarefa.EM_ANDAMENTO;
+import static br.com.esternevess.tarefas.dominio.StatusTarefa.PAUSADA;
+import static br.com.esternevess.tarefas.dominio.StatusTarefa.PLANEJADA;
+
+/**
+ * O fluxo permitido entre status, em um só lugar.
+ *
+ * &lt;pre&gt;
+ * PLANEJADA -&gt; A_FAZER -&gt; EM_ANDAMENTO -&gt; CONCLUIDA
+ *                              ^  |
+ *                              |  v
+ *                            PAUSADA
+ * &lt;/pre&gt;
+ *
+ * Uma tarefa concluída não volta: reabrir seria criar outra. Deixar a regra numa
+ * tabela, e não espalhada em vários &quot;if&quot;, faz o fluxo caber numa olhada e torna
+ * trivial testar todas as combinações.
+ */
+public final class TransicoesDeStatus {
+
+<span class="fc" id="L30">    private static final Map&lt;StatusTarefa, Set&lt;StatusTarefa&gt;&gt; PERMITIDAS = new EnumMap&lt;&gt;(StatusTarefa.class);</span>
+
+    static {
+<span class="fc" id="L33">        PERMITIDAS.put(PLANEJADA, EnumSet.of(A_FAZER));</span>
+<span class="fc" id="L34">        PERMITIDAS.put(A_FAZER, EnumSet.of(EM_ANDAMENTO));</span>
+<span class="fc" id="L35">        PERMITIDAS.put(EM_ANDAMENTO, EnumSet.of(PAUSADA, CONCLUIDA));</span>
+<span class="fc" id="L36">        PERMITIDAS.put(PAUSADA, EnumSet.of(EM_ANDAMENTO));</span>
+<span class="fc" id="L37">        PERMITIDAS.put(CONCLUIDA, EnumSet.noneOf(StatusTarefa.class));</span>
+<span class="fc" id="L38">    }</span>
+
+    private TransicoesDeStatus() {
+    }
+
+    /** Para quais status a tarefa pode ir a partir de {@code de}. A cópia evita alterar a tabela. */
+    public static Set&lt;StatusTarefa&gt; destinosDe(StatusTarefa de) {
+<span class="fc" id="L45">        return EnumSet.copyOf(PERMITIDAS.get(de));</span>
+    }
+
+    public static boolean permitida(StatusTarefa de, StatusTarefa para) {
+<span class="fc" id="L49">        return PERMITIDAS.get(de).contains(para);</span>
+    }
+
+    /** Lança {@link TransicaoInvalidaException} se o movimento não for permitido. */
+    public static void validar(StatusTarefa de, StatusTarefa para) {
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (!permitida(de, para)) {</span>
+<span class="fc" id="L55">            throw new TransicaoInvalidaException(de, para);</span>
+        }
+<span class="fc" id="L57">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

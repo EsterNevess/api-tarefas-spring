@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Feriados.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-tarefas</a> &gt; <a href="index.source.html" class="el_package">br.com.esternevess.tarefas.dominio</a> &gt; <span class="el_source">Feriados.java</span></div><h1>Feriados.java</h1><pre class="source lang-java linenums">package br.com.esternevess.tarefas.dominio;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * Feriados nacionais usados na contagem de dias úteis.
+ *
+ * &lt;p&gt;&lt;b&gt;Escopo:&lt;/b&gt; só os feriados nacionais. Feriados estaduais, municipais e
+ * pontos facultativos (como o Carnaval) ficam de fora. A contagem de prazo
+ * oficial, como a processual, tem regras próprias; isto é uma demonstração e não
+ * substitui a contagem oficial.
+ */
+public final class Feriados {
+
+    /** A Consciência Negra virou feriado nacional em 2024 (Lei 14.759/2023). */
+    private static final int ANO_CONSCIENCIA_NEGRA_NACIONAL = 2024;
+
+    private Feriados() {
+    }
+
+    public static Set&lt;LocalDate&gt; nacionaisDe(int ano) {
+<span class="fc" id="L24">        Set&lt;LocalDate&gt; feriados = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L25">        feriados.add(LocalDate.of(ano, 1, 1));   // Confraternização Universal</span>
+<span class="fc" id="L26">        feriados.add(LocalDate.of(ano, 4, 21));  // Tiradentes</span>
+<span class="fc" id="L27">        feriados.add(LocalDate.of(ano, 5, 1));   // Dia do Trabalho</span>
+<span class="fc" id="L28">        feriados.add(LocalDate.of(ano, 9, 7));   // Independência</span>
+<span class="fc" id="L29">        feriados.add(LocalDate.of(ano, 10, 12)); // Nossa Senhora Aparecida</span>
+<span class="fc" id="L30">        feriados.add(LocalDate.of(ano, 11, 2));  // Finados</span>
+<span class="fc" id="L31">        feriados.add(LocalDate.of(ano, 11, 15)); // Proclamação da República</span>
+<span class="fc" id="L32">        feriados.add(LocalDate.of(ano, 12, 25)); // Natal</span>
+<span class="fc" id="L33">        feriados.add(sextaFeiraSanta(ano));      // móvel: depende da Páscoa</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (ano &gt;= ANO_CONSCIENCIA_NEGRA_NACIONAL) {</span>
+<span class="fc" id="L35">            feriados.add(LocalDate.of(ano, 11, 20));</span>
+        }
+<span class="fc" id="L37">        return feriados;</span>
+    }
+
+    public static LocalDate sextaFeiraSanta(int ano) {
+<span class="fc" id="L41">        return pascoa(ano).minusDays(2);</span>
+    }
+
+    /**
+     * Domingo de Páscoa, pelo algoritmo de Meeus/Jones/Butcher (calendário
+     * gregoriano). É a única data móvel que precisamos: a Sexta-feira Santa
+     * é sempre dois dias antes dela.
+     */
+    public static LocalDate pascoa(int ano) {
+<span class="fc" id="L50">        int a = ano % 19;</span>
+<span class="fc" id="L51">        int b = ano / 100;</span>
+<span class="fc" id="L52">        int c = ano % 100;</span>
+<span class="fc" id="L53">        int d = b / 4;</span>
+<span class="fc" id="L54">        int e = b % 4;</span>
+<span class="fc" id="L55">        int f = (b + 8) / 25;</span>
+<span class="fc" id="L56">        int g = (b - f + 1) / 3;</span>
+<span class="fc" id="L57">        int h = (19 * a + b - d - g + 15) % 30;</span>
+<span class="fc" id="L58">        int i = c / 4;</span>
+<span class="fc" id="L59">        int k = c % 4;</span>
+<span class="fc" id="L60">        int l = (32 + 2 * e + 2 * i - h - k) % 7;</span>
+<span class="fc" id="L61">        int m = (a + 11 * h + 22 * l) / 451;</span>
+<span class="fc" id="L62">        int mes = (h + l - 7 * m + 114) / 31;</span>
+<span class="fc" id="L63">        int dia = ((h + l - 7 * m + 114) % 31) + 1;</span>
+<span class="fc" id="L64">        return LocalDate.of(ano, mes, dia);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

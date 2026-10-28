@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CalculadoraDeSituacao.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api-tarefas</a> &gt; <a href="index.source.html" class="el_package">br.com.esternevess.tarefas.dominio</a> &gt; <span class="el_source">CalculadoraDeSituacao.java</span></div><h1>CalculadoraDeSituacao.java</h1><pre class="source lang-java linenums">package br.com.esternevess.tarefas.dominio;
+
+import java.time.LocalDate;
+
+/**
+ * Decide a etiqueta da tarefa a partir do prazo.
+ *
+ * &lt;ul&gt;
+ *   &lt;li&gt;{@code ENCERRADA}: já foi concluída, o prazo não importa mais.&lt;/li&gt;
+ *   &lt;li&gt;{@code ATRASADA}: o prazo é anterior a hoje.&lt;/li&gt;
+ *   &lt;li&gt;{@code URGENTE}: vence hoje ou em até {@value #DIAS_UTEIS_DE_URGENCIA} dias úteis.&lt;/li&gt;
+ *   &lt;li&gt;{@code NO_PRAZO}: tem folga.&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ * Quem pergunta &quot;que dia é hoje&quot; é quem chama, e não esta classe. Assim o teste fixa a
+ * data e o resultado deixa de depender do dia em que ele roda, que é a causa clássica
+ * de teste que passa hoje e quebra na segunda-feira.
+ */
+public final class CalculadoraDeSituacao {
+
+    static final int DIAS_UTEIS_DE_URGENCIA = 2;
+
+    private CalculadoraDeSituacao() {
+    }
+
+    public static SituacaoTarefa calcular(StatusTarefa status, LocalDate prazo, LocalDate hoje) {
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (status == StatusTarefa.CONCLUIDA) {</span>
+<span class="fc" id="L28">            return SituacaoTarefa.ENCERRADA;</span>
+        }
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        if (prazo.isBefore(hoje)) {</span>
+<span class="fc" id="L31">            return SituacaoTarefa.ATRASADA;</span>
+        }
+<span class="fc" id="L33">        LocalDate limiteDaUrgencia = DiasUteis.adicionar(hoje, DIAS_UTEIS_DE_URGENCIA);</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (!prazo.isAfter(limiteDaUrgencia)) {</span>
+<span class="fc" id="L35">            return SituacaoTarefa.URGENTE;</span>
+        }
+<span class="fc" id="L37">        return SituacaoTarefa.NO_PRAZO;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
